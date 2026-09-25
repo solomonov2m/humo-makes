@@ -1,6 +1,7 @@
 import { TILE, TILE_FOREST, TILE_GRASS, TILE_HILL } from "./world.js";
 import { METERS_PER_TILE } from "./measure.js";
 import { pickBeast } from "./nature.js";
+import { hungerAim, liveBeast } from "./beast.js";
 
 let NEXT_ANIMAL = 1;
 
@@ -21,7 +22,8 @@ export class Animal {
 
   step(world, hunters, phase) {
     if (!this.alive) return;
-    if (phase === "night") return;
+    liveBeast(this, world);
+    if (!this.alive || phase === "night") return;
     const threat = nearest(this, hunters, 5);
     if (threat) {
       this.fleeing = true;
@@ -32,8 +34,12 @@ export class Animal {
       return;
     }
     this.fleeing = false;
+    const aim = hungerAim(this, world);
     this.wanderTimer -= 1;
-    if (!this.dest || this.wanderTimer <= 0 || !fits(world, this, this.dest.x, this.dest.y)) {
+    if (aim && fits(world, this, aim.x, aim.y)) {
+      this.dest = aim;
+      this.wanderTimer = 8;
+    } else if (!this.dest || this.wanderTimer <= 0 || !fits(world, this, this.dest.x, this.dest.y)) {
       this.dest = graze(world, this);
       this.wanderTimer = 18 + Math.random() * 24;
     }
@@ -41,7 +47,8 @@ export class Animal {
     const dy = this.dest.y - this.y;
     const dist = Math.hypot(dx, dy) || 1;
     if (dist < 0.2) return;
-    this.tryMove(world, this.x + (dx / dist) * 0.05, this.y + (dy / dist) * 0.05);
+    const pace = aim ? 0.18 : 0.05;
+    this.tryMove(world, this.x + (dx / dist) * pace, this.y + (dy / dist) * pace);
   }
 
   tryMove(world, nx, ny) {

@@ -13,15 +13,6 @@ export function fieldKnown(culture) {
   return knows(culture, "Поле");
 }
 
-export function growFields(world) {
-  if (!world.fields) return;
-  for (const field of world.fields) {
-    if (field.ripe) continue;
-    field.grow = (field.grow || 0) + 1;
-    if (field.grow >= CROPS[field.crop].days) field.ripe = true;
-  }
-}
-
 function plotNear(world, house) {
   const steps = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [-1, 1], [1, -1], [-1, -1], [2, 0], [0, 2], [-2, 0], [0, -2], [3, 0], [0, 3]];
   for (const [dx, dy] of steps) {
@@ -75,8 +66,7 @@ export function workField(agent, world) {
   const field = agent.target;
   const crop = CROPS[field.crop] || CROPS[0];
   if (!field.ripe) {
-    field.grow = Math.min(crop.days, (field.grow || 0) + 0.4);
-    if (field.grow >= crop.days) field.ripe = true;
+    field.tilled = true;
     practice(agent, "farm", 0.08);
     agent.tradeWait = 14;
     agent.activity = `ухаживает: ${crop.name}`;

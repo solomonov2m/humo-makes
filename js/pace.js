@@ -62,7 +62,7 @@ function liveBeat(sim, watch) {
   const born = [];
   for (const agent of sim.agents) {
     if (!agent.alive) continue;
-    metabolize(agent, world.day, 1 / BEATS);
+    metabolize(agent, world.day, 1 / BEATS, world);
     agent.dayShare = (agent.dayShare || 0) + 1 / BEATS;
     if (watch) continue;
     const neighbors = sim.neighborsOf(agent, agent.traits.vision);

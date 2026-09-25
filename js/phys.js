@@ -2,21 +2,19 @@
 
 import { TILE_DEEP, TILE_FRESH, TILE_SHALLOW, TILE_WATER } from "./world.js";
 import { groundMatter } from "./matter.js";
-import { seasonName } from "./press.js";
+import { groundTemp } from "./climate.js";
 import { woodFloats } from "./laws.js";
 import { digest } from "./metabol.js";
 import { rubHeat } from "./friction.js";
 
 const NEI = [[1, 0], [-1, 0], [0, 1], [0, -1]];
 
-export function ambient(world) {
-  return seasonName(world.day || 0) === "зима" ? -2 : 12;
-}
-
 export function cellHeat(world, x, y) {
   ensure(world);
-  if (!world.inBounds(x, y)) return ambient(world);
-  return ambient(world) + world.heat[world.idx(x, y)];
+  const ix = Math.round(x);
+  const iy = Math.round(y);
+  if (!world.inBounds(ix, iy)) return groundTemp(world, ix, iy);
+  return groundTemp(world, ix, iy) + world.heat[world.idx(ix, iy)];
 }
 
 export function warm(world, x, y, degrees) {
@@ -70,6 +68,15 @@ export function sip(agent, world, x, y) {
   const ix = Math.round(x);
   const iy = Math.round(y);
   const fresh = world.tileAt(ix, iy) === TILE_FRESH || NEI.some(([dx, dy]) => world.tileAt(ix + dx, iy + dy) === TILE_FRESH);
+  if (phase(world, ix, iy) === "ice") {
+    if (!fresh) {
+      agent.thirst = Math.min(100, agent.thirst + 6);
+      return { fresh: false, note: "солёный лёд не поит" };
+    }
+    digest(agent, "water", 0.35);
+    agent.energy = Math.max(0, agent.energy - 6);
+    return { fresh: true, note: "тает лёд во рту" };
+  }
   if (!fresh) {
     agent.thirst = Math.min(100, agent.thirst + 6);
     return { fresh: false, note: "солёная вода сушит" };

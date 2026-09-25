@@ -41,10 +41,11 @@ export function pushFeelings(agent, scores) {
   const feelings = agent.feelings;
   const aware = agent.aware;
   if (!feelings || !aware) return "";
-  if (aware.clarity < 0.22) return bodyLead(feelings);
+  if (aware.clarity < 0.22) return leadBody(scores, feelings);
   scores[0] += feelings.thirst * 1.35;
   scores[1] += feelings.hunger * 1.15;
-  scores[4] += feelings.fatigue * 1.05 + feelings.pain * 0.85 + feelings.cold * 0.45;
+  scores[4] += feelings.pain * 0.85 + feelings.cold * 0.45;
+  scores[8] += feelings.fatigue * 1.05;
   scores[2] -= feelings.fear * 1.4 + feelings.pain * 0.7;
   scores[3] -= feelings.fear * 0.8;
   scores[7] += feelings.fear * 0.9 + feelings.curiosity * aware.clarity * 0.45;
@@ -79,10 +80,19 @@ export function feelingHTML(agent) {
   `;
 }
 
+const LEAD_AT = { drink: 0, eat: 1, rest: 4, wander: 7, sleep: 8 };
+
+function leadBody(scores, feelings) {
+  const lead = bodyLead(feelings);
+  if (LEAD_AT[lead] != null) scores[LEAD_AT[lead]] += 0.85;
+  return lead;
+}
+
 function bodyLead(feelings) {
   if (feelings.fear > 0.62) return "wander";
   if (feelings.thirst > 0.68) return "drink";
   if (feelings.hunger > 0.68) return "eat";
-  if (feelings.pain > 0.55 || feelings.fatigue > 0.7) return "rest";
+  if (feelings.fatigue > 0.7) return "sleep";
+  if (feelings.pain > 0.55) return "rest";
   return "";
 }

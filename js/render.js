@@ -5,7 +5,8 @@ import { CROPS } from "./farm.js";
 import { BUSH_PX, personScale } from "./scale.js";
 import { ADULT_M, METERS_PER_TILE } from "./measure.js";
 import { drawDwelling, dwellingBox } from "./home-draw.js";
-import { drawCanopy, drawGround as paintGround } from "./ground-paint.js";
+import { drawGround as paintGround } from "./ground-paint.js";
+import { drawMarks } from "./land-mark.js";
 import { drawScene } from "./scene-draw.js";
 import { drawRoads } from "./road-draw.js";
 import { drawAnimals } from "./animal.js";
@@ -65,8 +66,9 @@ function drawWood(ctx, world) {
 
 export function drawWorld(ctx, world) {
   paintGround(ctx, world);
+  drawMarks(ctx, world, "ground");
   drawRoads(ctx, world);
-  drawCanopy(ctx, world);
+  drawMarks(ctx, world, "cover");
   drawScene(ctx, world);
   drawFood(ctx, world);
   drawWood(ctx, world);

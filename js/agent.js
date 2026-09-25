@@ -195,7 +195,7 @@ export class Agent {
 
     this.age += 1;
     const share = Math.max(0, 1 - (this.dayShare || 0));
-    if (share > 0.02) metabolize(this, world.day, share);
+    if (share > 0.02) metabolize(this, world.day, share, world);
     this.dayShare = 0;
     senseFeelings(this, world);
     wakeMind(this);

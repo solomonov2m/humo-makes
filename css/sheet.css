@@ -168,31 +168,6 @@
 #thingCall, #thingNeed { margin: var(--space-2) 0 0; }
 #thingWho { margin-top: var(--space-3); }
 
-#thingTag {
-  position: absolute;
-  z-index: 2;
-  max-width: 220px;
-  padding: 8px 10px;
-  border-radius: 10px;
-  background: rgba(247, 241, 230, 0.94);
-  color: var(--ink);
-  pointer-events: none;
-  box-shadow: 0 8px 20px rgba(12, 36, 48, 0.28);
-}
-#thingTag strong {
-  display: block;
-  font-family: var(--display);
-  font-size: 18px;
-  font-weight: 560;
-  line-height: 1.1;
-}
-#thingTag span {
-  display: block;
-  margin-top: 4px;
-  font-size: 13px;
-  color: var(--muted);
-}
-
 @media (prefers-reduced-motion: no-preference) {
   .meter > span, .bar > span { transition: width 180ms linear; }
 }

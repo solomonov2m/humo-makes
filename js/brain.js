@@ -48,7 +48,6 @@ export function weigh(agent, world, neighbors, byId) {
   const plannedAt = ACTS.indexOf(planned);
   if (plannedAt >= 0) scores[plannedAt] += 0.55 + agent.mind / 180;
   pushFeelings(agent, scores);
-  if ((agent.feelings?.fatigue || 0) > 0.45) scores[ACTS.indexOf("sleep")] += agent.feelings.fatigue * 0.4;
   if ((agent.feelings?.fear || 0) > 0.4) scores[ACTS.indexOf("flee")] += agent.feelings.fear * 0.6;
   return { scores, input, hidden, slot };
 }

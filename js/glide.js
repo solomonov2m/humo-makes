@@ -1,6 +1,7 @@
 import { tilesFor } from "./measure.js";
 import { DAY_SECONDS } from "./clock.js";
 import { sleepGlide, tendSleep } from "./sleep.js";
+import { stirred } from "./nerves.js";
 import { layCourse, takeArmful } from "./housing.js";
 import { courtMeet } from "./court.js";
 import { actDeed } from "./deeds.js";
@@ -38,7 +39,7 @@ function heed(sim, agent, gameSeconds) {
   const fear = feel.fear || 0;
   const mark = (feel.hunger || 0) + (feel.thirst || 0) + fear;
   const shifted = agent.feelMark != null && Math.abs(mark - agent.feelMark) > 0.18;
-  const asleep = agent.activity === "спит" && fear < 0.45 && (feel.thirst || 0) < 0.8;
+  const asleep = agent.activity === "спит" && !stirred(agent) && fear < 0.45 && (feel.thirst || 0) < 0.8;
   agent.heedIn = (agent.heedIn || 0) + gameSeconds;
   if (asleep || (!arrived && !shifted && fear < 0.5 && agent.heedIn < 90)) return;
   agent.heedIn = 0;

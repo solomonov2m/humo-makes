@@ -18,13 +18,6 @@ export function prepareWood(world) {
   }
 }
 
-export function regrowWood(world) {
-  if (!world.wood) return;
-  for (const pile of world.wood.values()) {
-    if (pile.amount < pile.cap) pile.amount = Math.min(pile.cap, pile.amount + 0.03);
-  }
-}
-
 export function houseTechKnown(culture) {
   return knows(culture, "Жилище");
 }

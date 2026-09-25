@@ -7,7 +7,7 @@ import { TILE_FOREST, TILE_FRESH, TILE_GRASS, TILE_HILL } from "./world.js";
 import { groundMatter } from "./matter.js";
 import { drawBulk } from "./bulk-draw.js";
 
-const NEAR = 48;
+const NEAR = 720;
 
 function meters(n) { return n / METERS_PER_TILE; }
 
@@ -21,7 +21,6 @@ export function drawScene(ctx, world) {
       const tile = world.tileAt(x, y);
       const biome = world.biome ? world.biome[world.idx(x, y)] : -1;
       if (tile === TILE_FOREST) stand(ctx, x, y);
-      else if (tile === TILE_GRASS) meadow(ctx, x, y);
       else if (tile === TILE_FRESH) stream(ctx, world, x, y);
       else if ((tile === TILE_HILL || biome === BIOME_ROCK) && peak(world, x, y)) cone(ctx, x, y);
       else if (biome === BIOME_FERTILE) orchard(ctx, x, y);
@@ -66,15 +65,17 @@ function stand(ctx, x, y) {
 }
 
 function stream(ctx, world, x, y) {
-  const bank = meters(14);
-  const lip = meters(4);
-  ctx.fillStyle = "#e4d0a4";
-  if (world.tileAt(x, y - 1) !== TILE_FRESH) ctx.fillRect(x, y, 1, bank);
-  if (world.tileAt(x, y + 1) !== TILE_FRESH) ctx.fillRect(x, y + 1 - bank, 1, bank);
-  if (world.tileAt(x - 1, y) !== TILE_FRESH) ctx.fillRect(x, y, bank, 1);
-  if (world.tileAt(x + 1, y) !== TILE_FRESH) ctx.fillRect(x + 1 - bank, y, bank, 1);
-  ctx.fillStyle = "#8fd8e2";
-  ctx.fillRect(x + lip, y + lip, 1 - lip * 2, 1 - lip * 2);
+  const vert = world.tileAt(x, y - 1) === TILE_FRESH || world.tileAt(x, y + 1) === TILE_FRESH;
+  const along = meters(90);
+  const across = meters(16);
+  ctx.fillStyle = "#d9c6a0";
+  ctx.beginPath();
+  ctx.ellipse(x + 0.5, y + 0.5, vert ? across * 1.7 : along, vert ? along : across * 1.7, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "#7ecad6";
+  ctx.beginPath();
+  ctx.ellipse(x + 0.5, y + 0.5, vert ? across : along * 0.9, vert ? along * 0.9 : across, 0, 0, Math.PI * 2);
+  ctx.fill();
 }
 
 function cone(ctx, x, y) {
@@ -98,19 +99,6 @@ function cone(ctx, x, y) {
   ctx.beginPath();
   ctx.ellipse(x + 0.5, y + 0.25, 0.045, 0.02, 0, 0, Math.PI * 2);
   ctx.fill();
-}
-
-function meadow(ctx, x, y) {
-  const step = meters(20);
-  let i = 0;
-  for (let dy = step * 0.4; dy < 1; dy += step) {
-    for (let dx = step * 0.4; dx < 1; dx += step) {
-      i += 1;
-      if (unit(x, y, i) < 0.45) continue;
-      ctx.fillStyle = i % 2 ? "#5c8a30" : "#8f6a32";
-      ctx.fillRect(x + dx, y + dy, meters(i % 2 ? 2.4 : 1.1), meters(0.7));
-    }
-  }
 }
 
 function orchard(ctx, x, y) {

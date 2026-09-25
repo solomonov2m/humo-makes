@@ -96,12 +96,6 @@ export class World {
     }
   }
 
-  regrowFood() {
-    for (const spot of this.food.values()) {
-      if (spot.amount < spot.cap) spot.amount = Math.min(spot.cap, spot.amount + 0.045);
-    }
-  }
-
   nearestFood(x, y, vision) {
     return foodNear(this, x, y, vision);
   }

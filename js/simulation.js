@@ -6,12 +6,13 @@ import { Genome } from "./genome.js";
 import { ADULT_DAYS } from "./text.js";
 import { Clock } from "./clock.js";
 import { countRoads, decayWear } from "./roads.js";
-import { houseTechKnown, prepareWood, regrowWood, tallyDwellings } from "./housing.js";
+import { houseTechKnown, prepareWood, tallyDwellings } from "./housing.js";
 import { advanceLore, freshCulture, loreView } from "./lore.js";
 import { eraView } from "./era.js";
-import { canHerd, tendFields } from "./civ.js";
-import { cropCensus, growFields } from "./farm.js";
-import { breedAnimals, leanWinter } from "./press.js";
+import { tendFields } from "./civ.js";
+import { cropCensus } from "./farm.js";
+import { breedAnimals } from "./beast.js";
+import { growGround, growPlots } from "./grow.js";
 import { emerge } from "./emerge.js";
 import { seedGround } from "./nature.js";
 import { resetLineages } from "./names.js";
@@ -21,7 +22,7 @@ import { layRot } from "./rot.js";
 import { weave } from "./weave.js";
 import { pressChart } from "./chart.js";
 
-const START_POPULATION = 100;
+const START_POPULATION = 10;
 
 export class Simulation {
   constructor() {
@@ -73,15 +74,12 @@ export class Simulation {
   tick() {
     this.day += 1;
     this.world.day = this.day;
-    this.world.regrowFood();
+    growGround(this.world);
     pressChart(this.world);
-    leanWinter(this.world, this.day);
     tendFields(this.world);
-    growFields(this.world);
-    breedAnimals(this.world, canHerd(this.culture) ? 16 : 10);
     const hunters = this.agents.filter((a) => a.alive && a.state === "hunt");
     for (const beast of this.world.animals) beast.step(this.world, hunters, "day");
-    regrowWood(this.world);
+    breedAnimals(this.world);
     decayWear(this.world);
     const worn = countRoads(this.world);
     this.culture.paths = worn.trails + worn.roads;
@@ -100,6 +98,7 @@ export class Simulation {
       advanceLore(agent, neighbors, this.culture, this.world);
     }
     emerge(this.culture, this.agents, this.world);
+    growPlots(this.world);
 
     for (const agent of this.agents) {
       if (!agent.alive && !agent.deathCounted) {

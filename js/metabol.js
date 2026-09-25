@@ -1,7 +1,7 @@
 // Обмен: еда разбирается на воду, глюкозу, жир и незаменимые аминокислоты.
 // Лизин из ягод почти не берётся — без него тело не растит белок.
 
-import { seasonName } from "./press.js";
+import { groundTemp } from "./climate.js";
 import { drain, keepStool, settleWaste, swallow } from "./organs.js";
 
 const ESS = ["lys", "met", "thr"];
@@ -58,7 +58,7 @@ export function nurse(mother, child) {
   return true;
 }
 
-export function metabolize(agent, day, share = 1) {
+export function metabolize(agent, day, share = 1, world) {
   if (!agent.alive || !agent.body) return;
   const slice = Math.max(0, Math.min(1, share));
   if (slice <= 0) return;
@@ -69,7 +69,7 @@ export function metabolize(agent, day, share = 1) {
   const store = agent.body.store;
   const rate = agent.traits.metabolismRate || 1;
   const size = kleiber(agent.body.mass);
-  const burn = dayBurn(agent, day) * slice;
+  const burn = dayBurn(agent, world) * slice;
   spendFuel(agent, burn);
   for (const key of ESS) store[key] = Math.max(0, store[key] - 0.014 * rate * size * slice);
   if (agent.belly) for (const key of ESS) store[key] = Math.max(0, store[key] - 0.03 * slice);
@@ -92,11 +92,19 @@ function pour(agent, meal, portion) {
   keepStool(agent, meal, portion);
 }
 
+function placeTemp(world, agent) {
+  const ix = Math.round(agent.x);
+  const iy = Math.round(agent.y);
+  let temp = groundTemp(world, ix, iy);
+  if (world.heat && world.inBounds(ix, iy)) temp += world.heat[world.idx(ix, iy)];
+  return temp;
+}
+
 function kleiber(mass) {
   return Math.pow(Math.max(3, mass) / 55, 0.75);
 }
 
-function dayBurn(agent, day) {
+function dayBurn(agent, world) {
   const size = kleiber(agent.body.mass);
   const rate = agent.traits.metabolismRate || 1;
   const state = agent.state;
@@ -107,7 +115,10 @@ function dayBurn(agent, day) {
   let burn = 0.05 * rate * size * work;
   const cover = agent.house ? agent.house.progress || 0 : 0;
   burn += 0.018 * size * (1 - cover);
-  if (day != null && seasonName(day) === "зима") burn += 0.028 * size * (1 - cover);
+  if (world && agent.x != null) {
+    const cold = 8 - placeTemp(world, agent);
+    if (cold > 0) burn += 0.028 * size * (1 - cover) * Math.min(2, cold / 10);
+  }
   if (agent.belly || agent.nursing > 0) burn += 0.022 * size;
   if (agent.body.mass < (agent.body.goal || agent.body.mass) - 1) burn += 0.016 * size;
   return burn;

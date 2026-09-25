@@ -1,21 +1,8 @@
-// Зима, болезни и звери, которые рождаются, а не появляются из воздуха.
-
-import { spawnAnimals } from "./animal.js";
+// Сезон задаёт воздух. Болезнь берёт возраст и голод тела, не календарную приписку.
 
 export function seasonName(day) {
   const part = Math.floor((day % 40) / 10);
   return ["весна", "лето", "осень", "зима"][part];
-}
-
-export function leanWinter(world, day) {
-  if (seasonName(day) !== "зима") return;
-  for (const spot of world.food.values()) {
-    spot.amount *= 0.99;
-  }
-}
-
-export function winterHunger(day) {
-  return seasonName(day) === "зима" ? 0.16 : 0;
 }
 
 export function ail(agent) {
@@ -31,21 +18,4 @@ export function ail(agent) {
   agent.causeOfDeath = worn ? "старость" : "истощение";
   agent.activity = worn ? "тело не выдержало" : "ослабел от голода";
   return true;
-}
-
-export function breedAnimals(world, cap) {
-  const live = (world.animals || []).filter((a) => a.alive);
-  if (live.length < 2 || live.length >= cap) return;
-  for (let i = 0; i < live.length; i++) {
-    for (let j = i + 1; j < live.length; j++) {
-      const dist = Math.hypot(live[i].x - live[j].x, live[i].y - live[j].y);
-      if (dist > 2.4 || Math.random() > 0.04) continue;
-      const born = spawnAnimals(world, 1, live[i].kind);
-      if (!born.length) return;
-      born[0].x = live[i].x;
-      born[0].y = live[i].y;
-      world.animals.push(born[0]);
-      return;
-    }
-  }
 }

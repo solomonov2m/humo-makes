@@ -2,7 +2,7 @@
 
 import { actMemory } from "./memory.js";
 
-const ACTS = ["drink", "eat", "hunt", "fish", "rest", "build", "mate", "wander"];
+const ACTS = ["drink", "eat", "hunt", "fish", "rest", "build", "mate", "wander", "sleep"];
 const NAME = {
   drink: "пить",
   eat: "есть",
@@ -12,6 +12,7 @@ const NAME = {
   build: "жильё",
   mate: "пара",
   wander: "ход",
+  sleep: "сон",
 };
 
 export function planAhead(agent, input) {
@@ -67,12 +68,14 @@ function step(input, act) {
     build: next[8] > 0 || next[9] > 0,
     mate: next[7] > 0,
     wander: true,
+    sleep: next[14] > 0.35,
   };
   if (!open[act]) return { next, score: -0.45 };
   if (act === "drink") { const score = next[2]; next[2] *= 0.3; return { next, score }; }
   if (act === "eat") { const score = next[1]; next[1] *= 0.4; return { next, score }; }
   if (act === "hunt" || act === "fish") { const score = next[1] * 0.7; next[1] *= 0.55; return { next, score }; }
   if (act === "rest") { const score = next[3] * 0.5; next[3] *= 0.45; return { next, score }; }
+  if (act === "sleep") { const score = next[14]; next[14] *= 0.4; return { next, score }; }
   if (act === "build") { const score = (1 - next[9]) * 0.4; next[9] = Math.min(1, next[9] + 0.35); return { next, score }; }
   if (act === "mate") return { next, score: 0.2 };
   return { next, score: 0.05 };

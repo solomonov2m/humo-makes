@@ -69,15 +69,20 @@ function scoreAll(agent, seen) {
 
 function sleepScore(nerve, seen, feel, agent) {
   if (!seen.bed) return -3;
-  if (agent.activity === "спит" && feel.fear < 0.45 && feel.thirst < 0.75 && feel.hunger < 0.55) return 1.1;
-  const work = agent.state === "hunt" || agent.state === "build" ? 0.15 : 0;
-  const pressure = (nerve.urge || nerve.pressure || 0) + feel.pain * 0.4 + work - (seen.bed.comfort || 0.2) * 0.35;
-  let score = pressure * 1.15 - feel.hunger * 0.45 - feel.thirst * 0.55 - feel.fear * 1.3;
-  if (feel.fear > 0.55 || feel.thirst > 0.82 || feel.hunger > 0.9) score -= 1.4;
+  const debt = nerve.pressure || 0;
+  const awake = Math.max(0, (nerve.awakeHours || 0) - 14);
+  if (agent.activity === "спит" && debt > 0.28 && feel.fear < 0.45 && feel.thirst < 0.75 && feel.hunger < 0.55) return 1.15;
+  const night = Math.max(0, (nerve.urge || 0) - debt);
+  const comfort = (seen.bed.comfort || 0.12) * 0.2;
+  let score = debt * 1.15 + night * 0.55 + comfort + awake * 0.075;
+  score -= feel.hunger * 0.45 + feel.thirst * 0.55 + feel.fear * 1.3;
+  if (feel.fear > 0.55 || feel.thirst > 0.82) score -= 1.4;
+  if (feel.hunger > 0.9 && debt < 0.85) score -= 1.4;
   return score;
 }
 
 function bodyLock(agent, world, neighbors, byId) {
+  if ((agent.nerve?.pressure || 0) >= 0.82) return null;
   const stage = lifeStage(agent);
   if ((stage === "infant" || stage === "child") && steerLife(agent, world, neighbors, byId)) {
     return { act: "wander", why: "тело ребёнка ведёт", score: 5, kept: true };

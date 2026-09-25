@@ -1,11 +1,12 @@
-// Открыто 5×5 км. Дальше туман, пока кто-то не захочет шагнуть туда.
+// Открыто 2×2 км вокруг стойбища. Дальше туман, пока кто-то не захочет шагнуть туда.
 
 import { METERS_PER_TILE } from "./measure.js";
 
-const OPEN_M = 5000;
+const OPEN_M = 2000;
 
-function span() {
-  return Math.max(8, Math.round(OPEN_M / METERS_PER_TILE));
+function halfSpan() {
+  const tiles = OPEN_M / METERS_PER_TILE;
+  return Math.max(1, (tiles - 1) / 2);
 }
 
 export function knownAt(world, x, y) {
@@ -45,7 +46,7 @@ export function pressChart(world) {
 }
 
 function reveal(world, cx, cy) {
-  const half = span() / 2;
+  const half = halfSpan();
   const x0 = Math.max(0, Math.floor(cx - half));
   const y0 = Math.max(0, Math.floor(cy - half));
   const x1 = Math.min(world.cols - 1, Math.ceil(cx + half));
