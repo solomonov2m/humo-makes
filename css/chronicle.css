@@ -1,0 +1,122 @@
+#chronicle {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+}
+#chronicle[hidden] { display: none; }
+
+.veil {
+  position: absolute;
+  inset: 0;
+  background: rgba(18, 32, 40, 0.46);
+}
+
+.board {
+  position: relative;
+  width: min(720px, 100%);
+  max-height: min(86vh, 820px);
+  overflow: auto;
+  padding: var(--space-5);
+  border-radius: 22px;
+  background: var(--paper);
+  box-shadow: 0 24px 60px rgba(12, 24, 32, 0.28);
+}
+
+.board-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.board-head h2 {
+  margin: 0;
+  font-family: var(--display);
+  font-size: 28px;
+  font-weight: 560;
+}
+
+#sundial { position: relative; margin: var(--space-3) 0 var(--space-4); text-align: center; }
+#sundial svg { width: 100%; height: auto; }
+#sundial .track { fill: none; stroke: #e7decd; stroke-width: 10; stroke-linecap: round; }
+#sundial .bead { fill: none; stroke: var(--river); stroke-width: 10; stroke-linecap: round; }
+#sundial .bead[data-phase="night"] { stroke: #3d4d86; }
+#sundial .bead[data-phase="dawn"] { stroke: #c9843a; }
+#sundial .bead[data-phase="dusk"] { stroke: var(--clay); }
+.dial-day {
+  margin: -28px 0 0;
+  font-family: var(--display);
+  font-size: 36px;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+.dial-phase { margin: 0; color: var(--muted); }
+
+#lenses, #eventFilters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: var(--space-4) 0;
+}
+#lenses button, #eventFilters button {
+  background: var(--linen);
+  color: var(--ink);
+  border-color: transparent;
+}
+#lenses button[aria-selected="true"],
+#eventFilters button[aria-pressed="true"] {
+  background: var(--river);
+  color: #f7fbfc;
+}
+
+.figures { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-2); }
+.figure {
+  padding: var(--space-3);
+  border-radius: 14px;
+  background: var(--linen);
+}
+.figure b {
+  display: block;
+  font-size: 22px;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+.figure span, .quiet, .spark figcaption { color: var(--muted); font-size: 13px; }
+.bars { display: grid; gap: var(--space-2); margin-top: var(--space-3); }
+.spark polyline { fill: none; stroke: var(--river); stroke-width: 2; }
+.events { list-style: none; margin: 0; padding: 0; }
+.events li {
+  display: grid;
+  grid-template-columns: 88px 1fr auto;
+  gap: var(--space-2);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--line);
+}
+.kind { font-size: 12px; font-weight: 600; color: var(--clay); }
+.when { color: var(--muted); font-variant-numeric: tabular-nums; }
+.spine { margin: var(--space-3) 0 0; padding: 0; list-style: none; }
+.spine li { display: grid; grid-template-columns: 16px 1fr; gap: var(--space-3); padding-bottom: var(--space-3); }
+.spine i { width: 12px; height: 12px; margin-top: 4px; border-radius: 50%; background: var(--line); }
+.spine li[data-state="done"] i { background: var(--moss); }
+.spine li[data-state="now"] i { background: var(--clay); box-shadow: 0 0 0 4px #f3d7c8; }
+.spine li[data-state="next"] i { background: var(--river); }
+.spine b { display: block; }
+.spine small { color: var(--muted); }
+.goal { margin-top: 0; }
+.meter { height: 8px; border-radius: 99px; background: var(--line); overflow: hidden; }
+.meter span { display: block; height: 100%; background: var(--river); }
+.bars div { display: grid; grid-template-columns: 92px 1fr 48px; gap: var(--space-2); align-items: center; }
+.bars i { display: block; height: 8px; border-radius: 99px; background: var(--line); overflow: hidden; }
+.bars b { display: block; height: 100%; background: var(--river); }
+.bars em { font-style: normal; text-align: right; font-variant-numeric: tabular-nums; }
+.spark svg { width: 100%; height: 72px; display: block; }
+.events p { margin: 0; }
+#chronicleClose { background: transparent; color: var(--ink); border-color: var(--line); min-height: 44px; }
+#eventFilters[hidden] { display: none; }
+#chronicle button:focus-visible { outline: 2px solid var(--river); outline-offset: 2px; }
+.chronicle-kicker { margin: 0; letter-spacing: 0.14em; text-transform: uppercase; font-size: 12px; color: var(--clay); }
+
+@media (max-width: 767px) {
+  .figures { grid-template-columns: 1fr; }
+  .events li { grid-template-columns: 1fr; }
+}

@@ -1,0 +1,62 @@
+#menu .eyebrow, #menu #thingCall { color: var(--sand); }
+#menu #thingNeed { color: var(--menu-dim); }
+#menu #thingTitle, #menu #thingWho { color: var(--menu-ink); }
+#menu #civ h2, #menu #dossierEmpty h2, #menu .name { color: var(--menu-ink); }
+#menu .blurb, #menu .goal, #menu .quiet, #menu #lookLine, #menu #dossierEmpty p { color: var(--menu-dim); }
+#menu .facts div, #menu #dossierEmpty, #menu .who, #menu .block, #menu .home {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(231, 242, 236, 0.12);
+}
+#menu .facts dt, #menu .block h3 { color: var(--menu-dim); }
+#menu .facts dd, #menu .hero-num, #menu .metric strong { color: var(--menu-ink); }
+#menu .track li { background: rgba(255, 255, 255, 0.06); color: var(--menu-dim); }
+#menu .kin-btn { background: transparent; color: var(--menu-ink); border-color: rgba(231, 242, 236, 0.2); }
+
+.hamlet-list { display: grid; gap: var(--space-2); }
+.hamlet-list button {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(231, 242, 236, 0.16);
+  background: transparent;
+  color: var(--menu-ink);
+  font: 600 14px/1.2 var(--font);
+  text-align: left;
+  cursor: pointer;
+}
+.hamlet-list button small { color: var(--menu-dim); font-weight: 500; font-size: 12px; }
+.hamlet-list button[aria-pressed="true"] {
+  background: var(--sand);
+  border-color: var(--sand);
+  color: #1a1408;
+}
+.hamlet-list button[aria-pressed="true"] small { color: #5c4316; }
+
+@media (max-width: 860px) {
+  #app { grid-template-columns: minmax(0, 1fr); }
+  #menu {
+    position: fixed;
+    inset: 0 0 0 auto;
+    z-index: 5;
+    width: min(100%, var(--menu-w));
+    height: 100vh;
+    box-shadow: -16px 0 40px rgba(0, 0, 0, 0.35);
+  }
+}
+
+@media (max-width: 720px) {
+  #app { grid-template-rows: minmax(0, 1fr) minmax(160px, 42%); }
+  #menu {
+    position: relative;
+    inset: auto;
+    width: auto;
+    height: auto;
+    max-height: 42vh;
+    box-shadow: none;
+  }
+}

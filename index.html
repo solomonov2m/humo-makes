@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>HUMO MAKES</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,560;9..144,650&family=Outfit:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+    <section id="stage" aria-label="Карта острова">
+      <canvas id="world" width="896" height="588"></canvas>
+      <div id="thingTag" hidden>
+        <strong id="tagTitle"></strong>
+        <span id="tagNeed"></span>
+      </div>
+      <button id="openMenu" type="button" hidden>Меню</button>
+    </section>
+
+    <aside id="menu">
+      <header class="menu-head">
+        <div>
+          <p class="mark">Живой остров</p>
+          <h1>Humo</h1>
+        </div>
+        <button id="mapOnly" type="button" aria-pressed="false">Только карта</button>
+      </header>
+
+      <section class="menu-block" aria-label="Время">
+        <p class="eyebrow">Время</p>
+        <p id="dayLine" class="day-line">День 0</p>
+        <p id="islandLine" class="hint">Остров на сервере ещё не ответил.</p>
+        <p id="rateLine" class="rate-line"></p>
+        <div id="speedList" class="speed-list" role="radiogroup" aria-label="Темп дней"></div>
+        <div class="menu-actions">
+          <button id="btnPause" type="button">Пауза</button>
+          <button id="btnChronicle" type="button" aria-expanded="false" aria-controls="chronicle">Хроника</button>
+          <button id="btnReset" type="button">Новый мир</button>
+        </div>
+      </section>
+
+      <section class="menu-block" aria-label="Карта">
+        <p class="eyebrow">Карта</p>
+        <div class="zoombox">
+          <button id="zoomOut" type="button" aria-label="Дальше">−</button>
+          <span id="zoomLabel">вся карта</span>
+          <button id="zoomIn" type="button" aria-label="Ближе">+</button>
+        </div>
+        <p class="hint">Плюс ведёт к стойбищу: сначала чем заняты, потом фигура вплотную. Колесо и двойной щелчок по точке — то же. Тащи карту.</p>
+      </section>
+
+      <section class="menu-block" aria-label="Поселения">
+        <p class="eyebrow">Поселения</p>
+        <div id="hamletList" class="hamlet-list"></div>
+      </section>
+
+      <section id="civ" aria-live="polite"></section>
+      <section id="person" aria-live="polite">
+        <article id="thingCard" hidden>
+          <p class="eyebrow">Предмет</p>
+          <h2 id="thingTitle"></h2>
+          <p id="thingCall"></p>
+          <p id="thingNeed"></p>
+          <button type="button" id="thingWho" class="kin-btn" data-pick hidden></button>
+        </article>
+        <div id="dossierEmpty">
+          <p class="eyebrow">Человек</p>
+          <h2>Никого не выбрано</h2>
+          <p>На карте синие — мужчины, розовые — женщины, зелёные — дети. Выбери фигуру, и здесь будут возраст, ум, навыки, дом и семья.</p>
+        </div>
+        <article id="dossierCard" hidden>
+          <div class="who">
+            <canvas id="portrait" width="360" height="440" aria-label="Портрет"></canvas>
+            <div class="who-copy">
+              <div id="whoText"></div>
+              <p id="lookLine"></p>
+            </div>
+          </div>
+          <div id="dossierBody"></div>
+        </article>
+      </section>
+    </aside>
+  </div>
+  <div id="chronicle" hidden>
+    <div class="veil" data-close></div>
+    <div class="board" role="dialog" aria-modal="true" aria-labelledby="chronicleTitle">
+      <div class="board-head">
+        <div>
+          <p class="chronicle-kicker">HUMO</p>
+          <h2 id="chronicleTitle">Хроника мира</h2>
+        </div>
+        <button type="button" id="chronicleClose">Закрыть</button>
+      </div>
+      <div id="sundial"></div>
+      <div id="lenses" role="tablist" aria-label="Категории"></div>
+      <div id="eventFilters" hidden></div>
+      <div id="chronicleBody" role="tabpanel"></div>
+    </div>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
