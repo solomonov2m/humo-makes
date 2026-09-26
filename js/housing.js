@@ -16,6 +16,34 @@ export function prepareWood(world) {
       world.wood.set(`${x},${y}`, { amount: 7 + Math.random() * 6, cap: 14 });
     }
   }
+  ensureGrove(world);
+}
+
+function ensureGrove(world) {
+  const camp = world.camp;
+  if (!camp || !world.wood) return;
+  for (const [key, pile] of world.wood) {
+    const cut = key.indexOf(",");
+    const x = Number(key.slice(0, cut));
+    const y = Number(key.slice(cut + 1));
+    if (Math.hypot(x - camp.x, y - camp.y) < 5 && pile.amount > 1) return;
+  }
+  let best = null;
+  let bestD = 12;
+  for (let dy = -10; dy <= 10; dy++) {
+    for (let dx = -10; dx <= 10; dx++) {
+      const x = camp.x + dx;
+      const y = camp.y + dy;
+      if (world.tileAt(x, y) !== TILE_FOREST) continue;
+      const dist = Math.hypot(dx, dy);
+      if (dist < bestD) {
+        bestD = dist;
+        best = { x, y };
+      }
+    }
+  }
+  if (!best) return;
+  world.wood.set(`${best.x},${best.y}`, { amount: 16, cap: 18, x: best.x, y: best.y });
 }
 
 export function houseTechKnown(culture) {
@@ -69,7 +97,7 @@ export function housingPlan(agent, world, byId) {
     }
   }
   const job = pressing(agent, world);
-  if (own && coverOf(own) < 1 && (job === "cover" || (agent.exposure || 0) >= 6)) {
+  if (own && coverOf(own) < 1) {
     if (!agent.pocket) return gatherPlan(agent, world);
     return { state: "build", target: own, activity: `несёт ${agent.pocket.name}` };
   }

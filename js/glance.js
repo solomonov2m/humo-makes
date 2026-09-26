@@ -2,6 +2,7 @@
 
 import { recall } from "./skills.js";
 import { bedOf } from "./nerves.js";
+import { nearestOre } from "./mine.js";
 
 export function glance(agent, world, neighbors, byId) {
   const eye = agent.traits.vision;
@@ -11,6 +12,7 @@ export function glance(agent, world, neighbors, byId) {
   const beast = threat(agent, world);
   const mate = agent.isAdult ? agent.findPartner(neighbors, byId) : null;
   const bed = bedOf(agent, world);
+  const ore = agent.isAdult ? nearestOre(world, agent.x, agent.y, eye) : null;
   const novel = agent.feelings ? agent.feelings.curiosity : 0;
   const bits = [];
   if (food) bits.push("еда");
@@ -18,8 +20,9 @@ export function glance(agent, world, neighbors, byId) {
   if (prey) bits.push("добыча");
   if (beast) bits.push("хищник");
   if (bed) bits.push("лежанка");
+  if (ore) bits.push("руда");
   if (!bits.length) bits.push("пусто вокруг");
-  return { food, water, prey, beast, mate, bed, novel, line: bits.join(", ") };
+  return { food, water, prey, beast, mate, bed, ore, novel, line: bits.join(", ") };
 }
 
 function threat(agent, world) {

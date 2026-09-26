@@ -1,7 +1,10 @@
 import { TILE, TILE_FOREST, TILE_GRASS, TILE_HILL } from "./world.js";
 import { METERS_PER_TILE } from "./measure.js";
+import { phaseOf } from "./clock.js";
 import { pickBeast } from "./nature.js";
 import { hungerAim, liveBeast } from "./beast.js";
+
+const GAIT = { hare: 1.6, bird: 0.9, deer: 1.1, boar: 0.85, wolf: 1.35, goat: 0.8 };
 
 let NEXT_ANIMAL = 1;
 
@@ -20,35 +23,57 @@ export class Animal {
     this.fleeing = false;
   }
 
-  step(world, hunters, phase) {
+  step(world) {
     if (!this.alive) return;
     liveBeast(this, world);
-    if (!this.alive || phase === "night") return;
-    const threat = nearest(this, hunters, 5);
+  }
+
+  drift(world, hunters, gameSeconds, dayFraction) {
+    if (!this.alive || gameSeconds <= 0 || phaseOf(dayFraction) === "night") return;
+    const threat = nearest(this, hunters, 6);
+    let aim = null;
+    let speed = GAIT[this.kind && this.kind.id] || 1;
     if (threat) {
       this.fleeing = true;
       const dx = this.x - threat.x;
       const dy = this.y - threat.y;
       const dist = Math.hypot(dx, dy) || 1;
-      this.tryMove(world, this.x + (dx / dist) * 0.11, this.y + (dy / dist) * 0.11);
-      return;
+      aim = { x: this.x + (dx / dist) * 4, y: this.y + (dy / dist) * 4 };
+      speed *= 2.2;
+    } else {
+      this.fleeing = false;
+      const food = hungerAim(this, world);
+      if (food && fits(world, this, food.x, food.y)) {
+        aim = food;
+        speed *= 1.25;
+      } else aim = this.holdCourse(world, gameSeconds);
     }
-    this.fleeing = false;
-    const aim = hungerAim(this, world);
-    this.wanderTimer -= 1;
-    if (aim && fits(world, this, aim.x, aim.y)) {
-      this.dest = aim;
-      this.wanderTimer = 8;
-    } else if (!this.dest || this.wanderTimer <= 0 || !fits(world, this, this.dest.x, this.dest.y)) {
+    this.stepToward(world, aim, speed * gameSeconds / METERS_PER_TILE);
+  }
+
+  holdCourse(world, gameSeconds) {
+    this.wanderTimer = (this.wanderTimer || 0) - gameSeconds;
+    if (!this.dest || this.wanderTimer <= 0 || !fits(world, this, this.dest.x, this.dest.y)) {
       this.dest = graze(world, this);
-      this.wanderTimer = 18 + Math.random() * 24;
+      this.wanderTimer = 40 + Math.random() * 90;
     }
-    const dx = this.dest.x - this.x;
-    const dy = this.dest.y - this.y;
-    const dist = Math.hypot(dx, dy) || 1;
+    return this.dest;
+  }
+
+  stepToward(world, aim, tiles) {
+    if (!aim || tiles <= 0) return;
+    const dx = aim.x - this.x;
+    const dy = aim.y - this.y;
+    const dist = Math.hypot(dx, dy);
     if (dist < 0.2) return;
-    const pace = aim ? 0.18 : 0.05;
-    this.tryMove(world, this.x + (dx / dist) * pace, this.y + (dy / dist) * pace);
+    const step = Math.min(tiles, dist);
+    const nx = this.x + (dx / dist) * step;
+    const ny = this.y + (dy / dist) * step;
+    const ok = this.fleeing ? world.isWalkable(Math.round(nx), Math.round(ny)) : fits(world, this, nx, ny);
+    if (ok) {
+      this.x = nx;
+      this.y = ny;
+    } else this.dest = null;
   }
 
   tryMove(world, nx, ny) {

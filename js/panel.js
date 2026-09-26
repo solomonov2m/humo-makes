@@ -36,7 +36,7 @@ export function mountPanel({ onPause, onReset, onSpeed, onZoomIn, onZoomOut }) {
       const hour = Math.floor(Math.min(0.999, Math.max(0, fraction)) * 24);
       const phase = phaseOf(fraction);
       const light = phase === "day" ? "" : ` · ${(PHASE_LABEL[phase] || "").toLowerCase()}`;
-      dayLine.textContent = `День ${day} · ${hour} ч${light}`;
+      dayLine.textContent = `Букит, ок. 3000 г. до н.э. · День ${day} · ${hour} ч${light}`;
     },
     setZoom(label, zoom, minZoom, maxZoom) {
       zoomLabel.textContent = label;

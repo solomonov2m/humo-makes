@@ -2,6 +2,7 @@
 
 import { ADULT_DAYS, SKILL_META, esc } from "./text.js";
 import { eraView } from "./era.js";
+import { stuff } from "./elements.js";
 
 const CRAFT = ["hunt", "fish", "farm", "craft", "raft"];
 
@@ -21,7 +22,30 @@ export function islandHTML(sim) {
     done: stage.state === "done",
     meter: stage.state === "now" ? view.meter : stage.state === "done" ? 1 : 0,
   }));
-  return block("", mark(items), view.goalText);
+  return block("", mark(items), view.goalText) + techHTML(sim.culture) + landHTML(sim.world);
+}
+
+function landHTML(world) {
+  const isles = world.farIsles || [];
+  if (!isles.length) return "";
+  const found = isles.filter((isle) => isle.visited).length;
+  const rafts = (world.rafts || []).length;
+  const sailing = rafts ? ` В воде сейчас ${rafts} ${rafts === 1 ? "плот" : "плота"}.` : "";
+  return `<section class="quest"><h3>Земли за проливом</h3><p class="hint">Открыто ${found} из ${isles.length}.${sailing}</p></section>`;
+}
+
+function techHTML(culture) {
+  const found = (culture && culture.found) || {};
+  const names = Object.keys(found);
+  const list = names.length
+    ? `<ul class="tech">${names.map((name) => `<li><b>${esc(name)}</b><span>${esc(found[name])}</span></li>`).join("")}</ul>`
+    : `<p class="hint">Ни одной догадки ещё не додумали.</p>`;
+  const metal = (culture && culture.metal) || {};
+  const stock = Object.keys(metal).filter((id) => metal[id] > 1);
+  const stockLine = stock.length
+    ? `<p class="hint">Запас: ${stock.map((id) => `${esc(stuff(id) ? stuff(id).name : id)} ${Math.round(metal[id])} г`).join(", ")}.</p>`
+    : "";
+  return `<section class="quest"><h3>Догадки</h3>${list}${stockLine}</section>`;
 }
 
 function personSteps(agent) {

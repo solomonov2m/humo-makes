@@ -1,6 +1,6 @@
 // Кусок ложится туда, куда дошли руки. Держится он, только если опора тянет его вес.
 
-const COVER_MASS = 9;
+const COVER_MASS = 7200;
 
 export function freshStack(x, y, ownerId) {
   return { x, y, ownerId, pieces: [], mass: 0, progress: 0, need: "холодно" };

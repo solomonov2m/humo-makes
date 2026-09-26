@@ -5,7 +5,7 @@ import { planAhead } from "./prefrontal.js";
 import { seatMind } from "./organs.js";
 import { feelInputs, pushFeelings } from "./aware.js";
 
-export const ACTS = ["drink", "eat", "hunt", "fish", "rest", "build", "mate", "wander", "sleep", "flee"];
+export const ACTS = ["drink", "eat", "hunt", "fish", "rest", "build", "mate", "wander", "sleep", "flee", "mine", "trade", "sail"];
 const HIDDEN = 6;
 const IN = 16;
 

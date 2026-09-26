@@ -6,6 +6,7 @@ import { metabolize } from "./metabol.js";
 import { senseFeelings } from "./feelings.js";
 import { reflect } from "./brain.js";
 import { sealChoice } from "./choice-log.js";
+import { tilesFor } from "./measure.js";
 
 const BEATS = 8;
 const BEAT = DAY_SECONDS / BEATS;
@@ -48,11 +49,22 @@ function advance(sim, slice, watch) {
     else {
       for (const agent of sim.agents) tendSleep(agent, sim.world, step, fraction);
     }
+    driftBeasts(sim, step, fraction);
     sim.clock.secondOfDay += step;
     left -= step;
     const onBeat = sim.clock.secondOfDay % BEAT < 1e-2;
     const beforeMidnight = sim.clock.secondOfDay < DAY_SECONDS - 1e-3;
     if (onBeat && beforeMidnight) liveBeat(sim, watch);
+  }
+}
+
+function driftBeasts(sim, gameSeconds, dayFraction) {
+  const hunters = [];
+  for (const agent of sim.agents) {
+    if (agent.alive && agent.state === "hunt") hunters.push(agent);
+  }
+  for (const beast of sim.world.animals || []) {
+    if (beast.drift) beast.drift(sim.world, hunters, gameSeconds, dayFraction);
   }
 }
 
@@ -68,7 +80,9 @@ function liveBeat(sim, watch) {
     const neighbors = sim.neighborsOf(agent, agent.traits.vision);
     const ease0 = agent.feelings ? agent.feelings.ease : 0;
     agent.decide(world, neighbors, byId);
+    agent.stepBudget = tilesFor(agent, world, BEAT);
     agent.act(world, neighbors, (child) => born.push(child), byId);
+    agent.stepBudget = 0;
     senseFeelings(agent, world);
     const expected = agent.choice ? agent.choice.expected : ease0;
     sealChoice(agent, reflect(agent, agent.feelings.ease - expected));

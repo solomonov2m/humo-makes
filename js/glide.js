@@ -3,6 +3,7 @@ import { DAY_SECONDS } from "./clock.js";
 import { sleepGlide, tendSleep } from "./sleep.js";
 import { stirred } from "./nerves.js";
 import { layCourse, takeArmful } from "./housing.js";
+import { mineArrive, mineDeposit } from "./mine.js";
 import { courtMeet } from "./court.js";
 import { actDeed } from "./deeds.js";
 import { mindWorks } from "./ideas.js";
@@ -18,16 +19,26 @@ export function glideAgents(sim, gameSeconds) {
     heed(sim, agent, gameSeconds);
     agent.stepBudget = tilesFor(agent, world, gameSeconds);
     if (!sleepGlide(agent, world)) {
-      if (!agent.target || agent.state === "wander") agent.wander(world, gameSeconds, dayFraction);
-      else agent.pursue(agent.target, world);
+      if (agent.state === "sail" && agent.raft) {
+        // движение по воде решает sailArrive ниже, а не обычный pursue
+      } else if (!agent.target || agent.state === "wander") {
+        agent.wander(world, gameSeconds, dayFraction);
+      } else {
+        agent.pursue(agent.target, world);
+      }
     }
-    agent.stepBudget = 0;
     const spot = agent.target || agent.wanderDest;
     const arrived = !spot || agent.distanceTo(spot) < 1.2;
     if (agent.studying && arrived && agent.state !== "sleep") mindWorks(agent, world, gameSeconds);
     if (agent.state === "hunt" || agent.state === "fish") actDeed(agent, world);
     if (agent.state === "gather" && agent.target && agent.distanceTo(agent.target) < 0.8) takeArmful(agent, world);
     if (agent.state === "build" && agent.house && agent.distanceTo(agent.house) < 0.95) layCourse(agent);
+    if (agent.state === "mine") {
+      mineArrive(agent, world);
+      mineDeposit(agent, world);
+    }
+    if (agent.state === "sail") sailArrive(agent, world);
+    agent.stepBudget = 0;
   }
   courtMeet(sim);
 }

@@ -5,6 +5,7 @@ import { raiseLand } from "./map-field.js";
 import { carveWater } from "./map-hydro.js";
 import { paintBiomes, placeBerries } from "./map-biome.js";
 import { settle } from "./map-settle.js";
+import { stampFarIsles } from "./far-isles.js";
 
 export function paintMap(world) {
   world.generatorVersion = GENERATOR_VERSION;
@@ -15,4 +16,5 @@ export function paintMap(world) {
   paintBiomes(world, elev, moist, sea);
   placeBerries(world);
   settle(world);
+  stampFarIsles(world);
 }

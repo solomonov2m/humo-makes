@@ -147,11 +147,21 @@
 #btnChronicle { margin-top: var(--space-3); justify-content: center; background: var(--linen); }
 
 @media (max-width: 860px) {
-  #chrome, .chrome-actions { flex-wrap: wrap; }
+  #chrome { flex-wrap: wrap; row-gap: var(--space-2); }
+  .chrome-actions {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    max-width: 100%;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .chrome-actions::-webkit-scrollbar { display: none; }
+  #chrome button, .zoom, #zoomLabel { flex-shrink: 0; }
   #eyes { height: 112px; }
-  #sheet { left: var(--space-3); right: var(--space-3); width: auto; }
+  #sheet { left: var(--space-3); right: var(--space-3); width: auto; max-height: min(58vh, 520px); }
   body:has(#sheet:not([hidden])) #visor { display: none; }
 }
+body:has(#sheet:not([hidden])) #thingTag { display: none; }
 @media (pointer: coarse) {
   #chrome button, #summon button, #sheetClose, #btnChronicle, #eyeWho {
     min-height: 44px;

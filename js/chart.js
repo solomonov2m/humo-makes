@@ -37,6 +37,11 @@ export function wishPast(world, x0, y0, x1, y1) {
   }
 }
 
+export function revealChart(world, x, y) {
+  if (!world.known) return;
+  reveal(world, x, y);
+}
+
 export function pressChart(world) {
   if (!world.known || !world.urge) return false;
   const spot = world.urge;

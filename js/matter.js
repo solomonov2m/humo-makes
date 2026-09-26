@@ -12,7 +12,7 @@ export function groundMatter(world, x, y) {
   const t = world.tileAt(x, y);
   if (!world.isLand(x, y) && t !== TILE_FRESH && t !== TILE_SHALLOW) return stuff("air");
   if (t === TILE_FRESH || t === TILE_SHALLOW) return stuff("water");
-  if (t === TILE_HILL) return stuff("stone");
+  if (t === TILE_HILL) return hillRock(x, y);
   if (t === TILE_FOREST) return stuff("wood");
   if (bank(world, x, y)) return stuff("clay");
   if (t === TILE_SAND) return beach(x, y);
@@ -24,6 +24,14 @@ function beach(x, y) {
   if (h === 0) return stuff("ore");
   if (h < 3) return stuff("salt");
   return stuff("sand");
+}
+
+function hillRock(x, y) {
+  const h = hash(x, y, 5) % 13;
+  if (h === 0) return stuff("copper");
+  if (h === 1) return stuff("tinore");
+  if (h < 4) return stuff("ore");
+  return stuff("stone");
 }
 
 function bank(world, x, y) {

@@ -9,7 +9,7 @@ export function knows(culture, name) {
 }
 
 export function freshCulture() {
-  return { kept: 0, found: {}, laws: {}, last: "", lastLaw: "", paths: 0, warm: null, ache: 0 };
+  return { kept: 0, found: {}, laws: {}, last: "", lastLaw: "", paths: 0, warm: null, ache: 0, metal: {} };
 }
 
 export function advanceLore(agent, neighbors, culture, world) {

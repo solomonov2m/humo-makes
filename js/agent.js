@@ -22,6 +22,9 @@ import { senseFeelings } from "./feelings.js";
 import { wakeMind } from "./aware.js";
 import { wishPast } from "./chart.js";
 import { nearCamp } from "./camp.js";
+import { bedOf } from "./nerves.js";
+import { mineArrive, mineDeposit } from "./mine.js";
+import { sailArrive } from "./voyage.js";
 
 let NEXT_ID = 1;
 
@@ -33,9 +36,12 @@ export const STATE = {
   GATHER: "gather",
   REST: "rest",
   FOLLOW: "follow",
+  SLEEP: "sleep",
+  MINE: "mine",
+  SAIL: "sail",
 };
 
-const ERRAND = new Set(["seek_water", "seek_food", "hunt", "fish", "carry", "gather", "build", "seek_camp"]);
+const ERRAND = new Set(["seek_water", "seek_food", "hunt", "fish", "carry", "gather", "build", "seek_camp", "mine"]);
 
 function clamp(v, a, b) {
   return Math.max(a, Math.min(b, v));
@@ -289,6 +295,30 @@ export class Agent {
           const word = dwellingWord(this.house);
           this.activity = `отдыхает: ${word}`;
         }
+        break;
+
+      case STATE.SLEEP: {
+        const bed = this.bed || bedOf(this, world);
+        if (!bed) break;
+        this.bed = bed;
+        this.pursue(bed, world);
+        if (this.distanceTo(bed) < 1.15) {
+          this.activity = "спит";
+          this.target = null;
+          this.slept = true;
+        }
+        break;
+      }
+
+      case STATE.MINE:
+        this.pursue(this.target, world);
+        mineArrive(this, world);
+        if (mineDeposit(this, world)) practice(this, "craft", 0.1);
+        break;
+
+      case STATE.SAIL:
+        if (!this.raft) this.pursue(this.target, world);
+        sailArrive(this, world);
         break;
 
       case STATE.FOLLOW: {

@@ -20,17 +20,17 @@ export function takeHaul(agent, world) {
   if (target.mode === "wood" || target.key) {
     const pile = world.wood && world.wood.get(target.key);
     if (!pile || pile.amount <= 0) return 0;
-    const grams = Math.min(pile.amount, BITE);
-    pile.amount -= grams;
-    agent.pocket = { ...stuff("wood"), grams };
+    const bite = Math.min(pile.amount, BITE);
+    pile.amount -= bite;
+    agent.pocket = { ...stuff("wood"), grams: bite * 1000 };
   } else {
     const left = stock(world, target.x, target.y);
     if (left < 0.4) return 0;
     const piece = groundMatter(world, target.x, target.y);
     if (!piece || piece.state !== "solid") return 0;
-    const grams = Math.min(left, BITE);
-    world.scrap.set(`${target.x},${target.y}`, left - grams);
-    agent.pocket = { ...piece, grams };
+    const bite = Math.min(left, BITE);
+    world.scrap.set(`${target.x},${target.y}`, left - bite);
+    agent.pocket = { ...piece, grams: bite * 1000 };
   }
   agent.wood = agent.pocket.grams;
   agent.activity = `берёт ${agent.pocket.name}`;

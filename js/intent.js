@@ -2,18 +2,22 @@
 
 import { lifeStage, steerLife } from "./life.js";
 import { housingPlan } from "./housing.js";
+import { minePlan } from "./mine.js";
+import { canVoyage, voyagePlan } from "./voyage.js";
+import { planTrade } from "./deeds.js";
+import { holds } from "./notions.js";
 import { actMemory } from "./memory.js";
 import { wantHaul } from "./folk.js";
 import { weigh } from "./brain.js";
 import { glance } from "./glance.js";
 import { choiceName, openChoice } from "./choice-log.js";
 
-const ACTS = ["drink", "eat", "hunt", "fish", "rest", "build", "mate", "wander", "sleep", "flee"];
+const ACTS = ["drink", "eat", "hunt", "fish", "rest", "build", "mate", "wander", "sleep", "flee", "mine", "trade", "sail"];
 
 export function choose(agent, world, neighbors, byId) {
   if (!agent.alive) return;
   const seen = glance(agent, world, neighbors, byId);
-  const scored = scoreAll(agent, seen);
+  const scored = scoreAll(agent, seen, world);
   const neural = weigh(agent, world, neighbors, byId);
   if (neural) {
     neural.scores.forEach((value, index) => {
@@ -46,7 +50,7 @@ export function choose(agent, world, neighbors, byId) {
   });
 }
 
-function scoreAll(agent, seen) {
+function scoreAll(agent, seen, world) {
   const feel = agent.feelings || {};
   const nerve = agent.nerve || { pressure: 0, urge: 0 };
   const memory = (act) => (agent.brain ? actMemory(agent.brain, act) : 0);
@@ -58,13 +62,66 @@ function scoreAll(agent, seen) {
     ["hunt", full ? -3 : feel.hunger * 0.7 + (seen.prey ? 0.45 : -1) - feel.fear * 0.8],
     ["fish", full ? -3 : feel.hunger * 0.55 + (seen.water ? 0.2 : -1)],
     ["rest", feel.fatigue * 0.7 + feel.pain * 0.4 - feel.fear],
-    ["build", cold * 0.9 + (!agent.house || agent.house.progress < 1 ? 0.35 : 0) - feel.hunger * 0.3],
-    ["mate", agent.isAdult && seen.mate && feel.hunger < 0.55 ? 0.35 : -1.2],
+    ["build", shelterScore(agent, feel, cold)],
+    ["mate", mateScore(agent, seen, feel)],
     ["wander", 0.08 + seen.novel * 0.55 + memory("wander") - feel.fatigue * 0.25],
     ["sleep", sleepScore(nerve, seen, feel, agent)],
     ["flee", (feel.fear + (seen.beast ? 0.7 : 0) + (agent.reek || 0)) * 1.5 - 0.15],
+    ["mine", mineScore(agent, seen, feel)],
+    ["trade", tradeScore(agent, feel)],
+    ["sail", sailScore(agent, feel, world)],
   ];
   return rows.map(([act, score]) => ({ act, score }));
+}
+
+function tradeScore(agent, feel) {
+  if (!agent.isAdult || (agent.tradeWait || 0) > 0) return -1;
+  if (feel.hunger > 0.55 || feel.thirst > 0.48) return -1;
+  const canRaft = (agent.wood || 0) >= 2 && agent.skills.water >= 0.35 && agent.skills.craft >= 0.35;
+  const canHerd = holds(agent, "Скот") && agent.house;
+  const canFarm = (agent.skills.farm || 0) > 0.1 && agent.house;
+  if (!canRaft && !canHerd && !canFarm) return -1;
+  return 0.3;
+}
+
+function sailScore(agent, feel, world) {
+  if (!agent.isAdult || feel.hunger > 0.65 || feel.thirst > 0.6 || feel.fear > 0.3) return -1;
+  if (agent.raft) return 1.2;
+  if ((agent.skills.raft || 0) < 0.4 || !canVoyage(world)) return -1;
+  return 0.4;
+}
+
+function mineScore(agent, seen, feel) {
+  if (!agent.isAdult) return -1;
+  if (feel.hunger > 0.72 || feel.thirst > 0.72 || feel.fear > 0.3) return -1;
+  if (isCarryingOre(agent)) return 1.1;
+  if (!holds(agent, "Камень")) return -1;
+  if (!seen.ore) return -1;
+  const curious = holds(agent, "Огонь") ? 0.5 : 0.2;
+  return 0.5 + curious - feel.hunger * 0.4;
+}
+
+function isCarryingOre(agent) {
+  const id = agent.pocket && agent.pocket.id;
+  return id === "ore" || id === "copper" || id === "tinore" || id === "iron" || id === "cu" || id === "tin" || id === "bronze";
+}
+
+function shelterScore(agent, feel, cold) {
+  if (!agent.isAdult) return -1;
+  const cover = agent.house ? agent.house.progress || 0 : 0;
+  if (cover >= 1) return -0.3;
+  const exposed = Math.min(1, (agent.exposure || 0) / 20);
+  let score = 0.96 + exposed * 0.65 + cold * 0.6;
+  if (agent.pocket && agent.pocket.grams > 0) score += 0.4;
+  score -= feel.hunger * 0.55 + feel.thirst * 0.45 + feel.fear * 0.8;
+  if (agent.nerve && agent.nerve.pressure > 0.72) score -= 0.7;
+  return score;
+}
+
+function mateScore(agent, seen, feel) {
+  const calm = agent.isAdult && seen.mate && feel.hunger < 0.55 && feel.thirst < 0.55;
+  if (!calm || (agent.nerve && agent.nerve.pressure > 0.62)) return -1.2;
+  return 0.42 + (agent.traits.fertility || 0.4) * 0.85;
 }
 
 function sleepScore(nerve, seen, feel, agent) {
@@ -115,6 +172,15 @@ function enact(agent, act, seen, world, byId) {
   if (act === "sleep" && seen.bed) return lie(agent, seen.bed);
   if (act === "flee" && seen.beast) return runOff(agent, seen.beast);
   if (act === "carry" && agent.house) return go(agent, "carry", agent.house, "несёт добычу домой");
+  if (act === "mine") {
+    const plan = minePlan(agent, world);
+    if (plan && plan.target) return go(agent, plan.state, plan.target, plan.activity);
+  }
+  if (act === "trade" && planTrade(agent, world)) return;
+  if (act === "sail") {
+    const plan = voyagePlan(agent, world);
+    if (plan && plan.target) return go(agent, plan.state, plan.target, plan.activity);
+  }
   if (act === "nurse" && agent.house) return go(agent, "rest", agent.house, "кормит младенца");
   wakeIfAsleep(agent);
   agent.state = "wander";
