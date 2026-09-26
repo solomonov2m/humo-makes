@@ -48,7 +48,7 @@ function nearestGround(world, x, y, vision) {
       const cy = y0 + dy;
       if (!knownAt(world, cx, cy) || !world.isLand(cx, cy)) continue;
       const piece = groundMatter(world, cx, cy);
-      if (!piece || piece.state !== "solid") continue;
+      if (!piece || piece.state !== "solid" || piece.kind === "ore") continue;
       if (stock(world, cx, cy) < 0.4) continue;
       const d = Math.hypot(dx, dy);
       if (d > vision) continue;

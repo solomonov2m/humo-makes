@@ -4,6 +4,7 @@ import { crowdLimit } from "./civ.js";
 import { pressing } from "./lack.js";
 import { farmPlan } from "./farm.js";
 import { nearestHaul, takeHaul } from "./haul.js";
+import { isMetal, isOre } from "./mine.js";
 import { coverOf, freshStack, layPiece, stackLine } from "./stack.js";
 
 const WOOD_CAP = 22;
@@ -99,6 +100,7 @@ export function housingPlan(agent, world, byId) {
   const job = pressing(agent, world);
   if (own && coverOf(own) < 1) {
     if (!agent.pocket) return gatherPlan(agent, world);
+    if (isOre(agent.pocket) || isMetal(agent.pocket)) return null;
     return { state: "build", target: own, activity: `несёт ${agent.pocket.name}` };
   }
   if (job === "field" && farmPlan(agent, world)) {
@@ -107,6 +109,7 @@ export function housingPlan(agent, world, byId) {
   if (agent.house || agent.partnerHome(byId)) return null;
   if (!agent.wantsNewHouse(world, byId)) return null;
   if (!agent.pocket) return gatherPlan(agent, world);
+  if (isOre(agent.pocket) || isMetal(agent.pocket)) return null;
   const site = claimStack(agent, world, byId);
   if (!site) return null;
   return { state: "build", target: site, activity: `несёт ${agent.pocket.name}` };
