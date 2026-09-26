@@ -4,6 +4,7 @@ import { stuffNear } from "./nature.js";
 import { closestPile } from "./pile-bin.js";
 import { canAlloy } from "./chem.js";
 import { stuff } from "./elements.js";
+import { kinHome } from "./folk.js";
 
 export function holds(agent, name) {
   return !!(agent && agent.ideas && agent.ideas[name]);
@@ -90,6 +91,7 @@ const IDEAS = [
   { name: "Железо", prior: ["Огонь", "Камень"], mind: 48, cost: 18, why: "в чёрном песке пляжа железо, его плавят углём из дерева", notice: (a, _n, w) => (a.skills.craft || 0) > 0.9 && a.ideas["Огонь"] && stuffNear(a, w, "ore") ? 0.3 : 0 },
   { name: "Сплав", prior: ["Железо"], mind: 52, cost: 16, why: "два металла в одном жаре дают то, чего не было ни в одном", notice: (a) => (a.skills.craft || 0) > 1.15 && a.ideas["Бронза"] && canAlloy(stuff("iron"), stuff("bronze")).ok ? 0.26 : 0 },
   { name: "Плавильня", prior: ["Сплав", "Жилище"], mind: 54, cost: 14, why: "жар надо удержать в одном месте", notice: (a) => roofed(a) && (a.skills.craft || 0) > 1.3 ? 0.3 : 0 },
+  { name: "Рынок", prior: ["Слово", "Дом"], mind: 34, cost: 14, why: "лишнее можно отдать чужому, а не только родне, и получить своё взамен", notice: (a, n) => (a.basket || 0) >= 4 && n.some((x) => x.alive && x.hunger > 40 && !kinHome(a, x)) ? 0.32 : 0 },
   { name: "Письмо", prior: ["Слово"], mind: 46, cost: 18, why: "одно и то же детям уже не вмещается в память", notice: (a, n) => a.children > 0 && n.filter((x) => x.alive && !x.isAdult).length ? 0.2 : 0 },
   { name: "Механика", prior: ["Колесо", "Железо"], mind: 56, cost: 20, why: "дерево и железо уже крутятся вместе", notice: (a) => roofed(a) && (a.skills.craft || 0) > 1.4 ? 0.18 : 0 },
   { name: "Печать", prior: ["Письмо"], mind: 60, cost: 20, why: "знак надо повторять чаще, чем успевает рука", notice: (a, n) => n.some((x) => !x.isAdult && (x.known || 0) >= 4) ? 0.16 : 0 },

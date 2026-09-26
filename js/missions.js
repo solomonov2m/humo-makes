@@ -45,7 +45,9 @@ function techHTML(culture) {
   const stockLine = stock.length
     ? `<p class="hint">Запас: ${stock.map((id) => `${esc(stuff(id) ? stuff(id).name : id)} ${Math.round(metal[id])} г`).join(", ")}.</p>`
     : "";
-  return `<section class="quest"><h3>Догадки</h3>${list}${stockLine}</section>`;
+  const coin = Math.round((culture && culture.coin) || 0);
+  const coinLine = coin > 0 ? `<p class="hint">В обороте рынка: ${coin} монет.</p>` : "";
+  return `<section class="quest"><h3>Догадки</h3>${list}${stockLine}${coinLine}</section>`;
 }
 
 function personSteps(agent) {

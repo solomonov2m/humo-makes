@@ -2,6 +2,7 @@
 
 import { remember, SKILL_KEYS } from "./skills.js";
 import { digest } from "./metabol.js";
+import { holds } from "./notions.js";
 
 export function bloodClose(a, b) {
   if (!a || !b) return false;
@@ -49,7 +50,7 @@ export function wantHaul(agent) {
   return agent.haul && agent.basket >= 4 && agent.house && agent.distanceTo(agent.house) > 1.1;
 }
 
-export function feedHearth(agent, neighbors) {
+export function feedHearth(agent, neighbors, culture) {
   if (!agent.house || agent.distanceTo(agent.house) > 1.3) return false;
   if ((agent.basket || 0) < 1) {
     agent.haul = false;
@@ -65,12 +66,33 @@ export function feedHearth(agent, neighbors) {
     fed = true;
     if (agent.basket < 1) break;
   }
-  agent.activity = fed ? "кормит своих у дома" : "принёс добычу домой";
+  const sold = agent.basket >= 1 && holds(agent, "Рынок") && marketSell(agent, neighbors, culture);
+  if (!sold) agent.activity = fed ? "кормит своих у дома" : "принёс добычу домой";
   agent.haul = agent.basket >= 4;
   return true;
 }
 
-function kinHome(agent, other) {
+function marketSell(agent, neighbors, culture) {
+  let sold = false;
+  for (const other of neighbors) {
+    if (!other.alive || other === agent || other.hunger < 32) continue;
+    if (kinHome(agent, other)) continue;
+    const bite = Math.min(agent.basket, 6, other.hunger);
+    if (bite < 1) continue;
+    digest(other, agent.basketKind || "meat", bite / 10);
+    agent.basket -= bite;
+    const price = Math.max(1, Math.round(bite * 2));
+    agent.coin = (agent.coin || 0) + price;
+    other.coin = (other.coin || 0) - price;
+    if (culture) culture.coin = (culture.coin || 0) + price;
+    agent.activity = `продал еду за ${price} монет`;
+    sold = true;
+    if (agent.basket < 1) break;
+  }
+  return sold;
+}
+
+export function kinHome(agent, other) {
   if (other.parents && other.parents.includes(agent.id)) return true;
   if (agent.partnerId === other.id) return true;
   if (agent.parents && other.parents && agent.parents.some((id) => other.parents.includes(id))) return true;

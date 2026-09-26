@@ -221,7 +221,7 @@ export class Agent {
     fadePlaces(this);
     sharePlaces(this, neighbors);
     if (tickBelly(this) && this.alive && !birthStrike(this)) this.tryMate(null, world, onBirth, byId, true);
-    feedHearth(this, neighbors);
+    feedHearth(this, neighbors, world.culture);
     if (ail(this)) return;
     tendBody(this, neighbors, byId);
     growPerson(this, neighbors);
@@ -243,7 +243,7 @@ export class Agent {
   act(world, neighbors, onBirth, byId) {
     if (this.state === "carry") {
       this.pursue(this.house, world);
-      feedHearth(this, neighbors);
+      feedHearth(this, neighbors, world.culture);
       return;
     }
     if (actDeed(this, world)) return;
